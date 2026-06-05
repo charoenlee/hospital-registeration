@@ -9,7 +9,7 @@ A simple hospital patient registration system with a Node.js/Express REST API, S
 - Register new patients (name, date of birth, gender, contact number, blood type)
 - List all patients in a table
 - Live search/filter by name, gender, or blood type
-- View full patient record in a modal
+- View full patient record on a dedicated detail page
 - Delete patient records
 
 ## Tech Stack
@@ -68,9 +68,11 @@ npm run dev
 ├── database.js     # SQLite setup and schema
 ├── package.json
 └── public/
-    ├── index.html  # Single-page UI
-    ├── style.css   # Responsive styles
-    └── app.js      # Frontend logic (fetch, render, modal)
+    ├── index.html   # Patient list and registration form
+    ├── patient.html # Patient detail page
+    ├── patient.js   # Detail page logic
+    ├── style.css    # Responsive styles
+    └── app.js       # List page logic (fetch, render, search)
 ```
 
 The SQLite database is stored as `patients.db` in the project root and is created automatically on first run.
