@@ -2,6 +2,8 @@
 
 A simple hospital patient registration system with a Node.js/Express REST API, SQLite database, and a plain HTML/CSS/JS frontend.
 
+![App screenshot](docs/screenshot.png)
+
 ## Features
 
 - Register new patients (name, date of birth, gender, contact number, blood type)
