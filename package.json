@@ -1,0 +1,17 @@
+{
+  "name": "hospital-registration",
+  "version": "1.0.0",
+  "description": "Hospital patient registration system",
+  "main": "server.js",
+  "scripts": {
+    "start": "node --no-warnings server.js",
+    "dev": "nodemon --exec 'node --no-warnings' server.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.18.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.0"
+  }
+}
