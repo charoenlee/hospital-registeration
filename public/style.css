@@ -117,6 +117,31 @@ input:focus, select:focus {
 }
 .section-header h2 { border: none; margin: 0; padding: 0; }
 
+/* ── Search bar ────────────────────────────────────────────────────────────── */
+.search-bar {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  margin-bottom: 1rem;
+}
+.search-bar input[type="search"] {
+  flex: 1;
+  padding: .55rem .75rem;
+  border: 1px solid #cbd5e0;
+  border-radius: 6px;
+  font-size: .95rem;
+}
+.search-bar input[type="search"]:focus {
+  outline: none;
+  border-color: #3182ce;
+  box-shadow: 0 0 0 3px rgba(49,130,206,.15);
+}
+.search-count {
+  font-size: .82rem;
+  color: #718096;
+  white-space: nowrap;
+}
+
 /* ── Patient table ─────────────────────────────────────────────────────────── */
 .patient-table {
   width: 100%;

@@ -7,9 +7,14 @@ const formError     = document.getElementById('form-error');
 const formSuccess   = document.getElementById('form-success');
 const listContainer = document.getElementById('patient-list-container');
 const refreshBtn    = document.getElementById('refresh-btn');
+const searchInput   = document.getElementById('search-input');
+const searchCount   = document.getElementById('search-count');
 const modalOverlay  = document.getElementById('modal-overlay');
 const modalClose    = document.getElementById('modal-close');
 const modalContent  = document.getElementById('modal-content');
+
+// In-memory cache of all patients; filtering never re-fetches from the server
+let allPatients = [];
 
 // ── Utility helpers ───────────────────────────────────────────────────────────
 
@@ -39,16 +44,44 @@ async function loadPatients() {
   try {
     const res = await fetch(API);
     if (!res.ok) throw new Error('Server error');
-    const patients = await res.json();
-    renderPatientTable(patients);
+    allPatients = await res.json();
+    // Re-apply whatever the user has typed so the list stays filtered after refresh
+    applyFilter();
   } catch (err) {
     listContainer.innerHTML = '<p class="alert alert-error">Could not load patients. Is the server running?</p>';
   }
 }
 
+// Filter allPatients by the current search term and re-render
+function applyFilter() {
+  const term = searchInput.value.trim().toLowerCase();
+  const filtered = term
+    ? allPatients.filter(p =>
+        p.name.toLowerCase().includes(term) ||
+        p.gender.toLowerCase().includes(term) ||
+        p.blood_type.toLowerCase().includes(term)
+      )
+    : allPatients;
+
+  // Show result count only when a search is active
+  if (term) {
+    searchCount.textContent = `${filtered.length} of ${allPatients.length} patient${allPatients.length !== 1 ? 's' : ''}`;
+    searchCount.classList.remove('hidden');
+  } else {
+    searchCount.classList.add('hidden');
+  }
+
+  renderPatientTable(filtered);
+}
+
 function renderPatientTable(patients) {
-  if (patients.length === 0) {
+  if (allPatients.length === 0) {
     listContainer.innerHTML = '<p class="no-data">No patients registered yet.</p>';
+    return;
+  }
+
+  if (patients.length === 0) {
+    listContainer.innerHTML = '<p class="no-data">No patients match your search.</p>';
     return;
   }
 
@@ -191,6 +224,7 @@ form.addEventListener('submit', async (e) => {
 // ── Event listeners ───────────────────────────────────────────────────────────
 
 refreshBtn.addEventListener('click', loadPatients);
+searchInput.addEventListener('input', applyFilter);
 
 // Close modal when clicking the X button or the backdrop
 modalClose.addEventListener('click', closeModal);
