@@ -5,7 +5,8 @@ A simple hospital patient registration system with a Node.js/Express REST API, S
 ## Features
 
 - Register new patients (name, date of birth, gender, contact number, blood type)
-- List all patients in a sortable table
+- List all patients in a table
+- Live search/filter by name, gender, or blood type
 - View full patient record in a modal
 - Delete patient records
 
