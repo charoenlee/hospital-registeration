@@ -9,9 +9,6 @@ const listContainer = document.getElementById('patient-list-container');
 const refreshBtn    = document.getElementById('refresh-btn');
 const searchInput   = document.getElementById('search-input');
 const searchCount   = document.getElementById('search-count');
-const modalOverlay  = document.getElementById('modal-overlay');
-const modalClose    = document.getElementById('modal-close');
-const modalContent  = document.getElementById('modal-content');
 
 // In-memory cache of all patients; filtering never re-fetches from the server
 let allPatients = [];
@@ -34,6 +31,15 @@ function showAlert(el, message) {
 function hideAlerts() {
   formError.classList.add('hidden');
   formSuccess.classList.add('hidden');
+}
+
+// Prevent XSS when inserting user-supplied text into innerHTML
+function escapeHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
 }
 
 // ── Patient list ──────────────────────────────────────────────────────────────
@@ -94,7 +100,7 @@ function renderPatientTable(patients) {
       <td data-label="Gender">${escapeHtml(p.gender)}</td>
       <td data-label="Blood Type">${escapeHtml(p.blood_type)}</td>
       <td data-label="Actions" class="actions">
-        <button class="btn btn-view" onclick="viewPatient(${p.id})">View</button>
+        <a href="/patient.html?id=${p.id}" class="btn btn-view">View</a>
         <button class="btn btn-danger" onclick="deletePatient(${p.id}, '${escapeHtml(p.name)}')">Delete</button>
       </td>
     </tr>
@@ -117,58 +123,15 @@ function renderPatientTable(patients) {
   `;
 }
 
-// Prevent XSS when inserting user-supplied text into innerHTML
-function escapeHtml(str) {
-  return String(str)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
-}
-
-// ── View patient (modal) ──────────────────────────────────────────────────────
-
-async function viewPatient(id) {
-  try {
-    const res = await fetch(`${API}/${id}`);
-    if (!res.ok) throw new Error('Not found');
-    const p = await res.json();
-
-    // Build detail rows for the modal
-    modalContent.innerHTML = `
-      <div class="detail-row"><span class="detail-label">Patient ID</span><span class="detail-value">${p.id}</span></div>
-      <div class="detail-row"><span class="detail-label">Full Name</span><span class="detail-value">${escapeHtml(p.name)}</span></div>
-      <div class="detail-row"><span class="detail-label">Date of Birth</span><span class="detail-value">${formatDate(p.dob)}</span></div>
-      <div class="detail-row"><span class="detail-label">Gender</span><span class="detail-value">${escapeHtml(p.gender)}</span></div>
-      <div class="detail-row"><span class="detail-label">Contact</span><span class="detail-value">${escapeHtml(p.contact)}</span></div>
-      <div class="detail-row"><span class="detail-label">Blood Type</span><span class="detail-value">${escapeHtml(p.blood_type)}</span></div>
-      <div class="detail-row"><span class="detail-label">Registered</span><span class="detail-value">${p.created_at}</span></div>
-      <div class="modal-actions">
-        <button class="btn btn-danger" onclick="deletePatient(${p.id}, '${escapeHtml(p.name)}', true)">Delete Record</button>
-      </div>
-    `;
-
-    modalOverlay.classList.remove('hidden');
-  } catch (err) {
-    alert('Could not fetch patient record.');
-  }
-}
-
-function closeModal() {
-  modalOverlay.classList.add('hidden');
-}
-
 // ── Delete patient ────────────────────────────────────────────────────────────
 
-async function deletePatient(id, name, fromModal = false) {
+async function deletePatient(id, name) {
   if (!confirm(`Delete patient "${name}" (ID ${id})? This cannot be undone.`)) return;
 
   try {
     const res = await fetch(`${API}/${id}`, { method: 'DELETE' });
     if (!res.ok) throw new Error('Delete failed');
-
-    if (fromModal) closeModal();
-    loadPatients(); // refresh list after deletion
+    loadPatients();
   } catch (err) {
     alert('Could not delete patient. Please try again.');
   }
@@ -208,14 +171,13 @@ form.addEventListener('submit', async (e) => {
     const data = await res.json();
 
     if (!res.ok) {
-      // Server returned validation errors
       showAlert(formError, data.errors ? data.errors.join(', ') : 'Registration failed.');
       return;
     }
 
     showAlert(formSuccess, `Patient "${data.name}" registered successfully (ID ${data.id}).`);
     form.reset();
-    loadPatients(); // refresh the list to show the new patient
+    loadPatients();
   } catch (err) {
     showAlert(formError, 'Network error — please check the server.');
   }
@@ -225,17 +187,6 @@ form.addEventListener('submit', async (e) => {
 
 refreshBtn.addEventListener('click', loadPatients);
 searchInput.addEventListener('input', applyFilter);
-
-// Close modal when clicking the X button or the backdrop
-modalClose.addEventListener('click', closeModal);
-modalOverlay.addEventListener('click', (e) => {
-  if (e.target === modalOverlay) closeModal();
-});
-
-// Close modal with Escape key
-document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape') closeModal();
-});
 
 // ── Initial load ──────────────────────────────────────────────────────────────
 loadPatients();
