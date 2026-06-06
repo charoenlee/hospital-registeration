@@ -2,7 +2,9 @@
 
 A simple hospital patient registration system with a Node.js/Express REST API, SQLite database, and a plain HTML/CSS/JS frontend.
 
-![App screenshot](docs/screenshot.png)
+![Patient list](docs/screenshot-list.png)
+
+![Patient detail](docs/screenshot-detail.png)
 
 ## Features
 
